@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experimento G — Fase 04</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+body {
+  background: #000;
+  color: #f5f5f5;
+}
+
+/* ===== PARTÍCULAS ===== */
+.particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  filter: blur(2px);
+  opacity: 0.15;
+  animation: float linear infinite;
+}
+
+@keyframes float {
+  from { transform: translateY(100vh); }
+  to { transform: translateY(-10vh); }
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.content {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+h1 {
+  font-weight: 300;
+  letter-spacing: 3px;
+  font-size: clamp(18px, 4vw, 24px);
+  margin-bottom: 30px;
+  opacity: 0.8;
+}
+
+.imagem {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  border-radius: 6px;
+  opacity: 0.85;
+  margin: 0 auto 25px auto;
+  display: block;
+}
+
+.romano {
+  font-size: clamp(40px, 8vw, 60px);
+  letter-spacing: 12px;
+  margin-bottom: 30px;
+}
+.romano span:last-child {
+  color: #fff;
+  text-shadow: 0 0 10px #fff;
+}
+
+input {
+  width: 100%;
+  max-width: 320px;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  text-align: center;
+  font-size: 15px;
+  letter-spacing: 2px;
+  outline: none;
+}
+
+button {
+  margin-top: 18px;
+  padding: 10px 30px;
+  background: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #fff;
+  color: #000;
+}
+
+.dicas {
+  margin-top: 25px;
+  font-size: 14px;
+  color: #aaa;
+  min-height: 60px;
+}
+
+.sucesso {
+  margin-top: 25px;
+  font-size: 16px;
+  letter-spacing: 2px;
+  opacity: 0;
+  transition: 1s;
+}
+
+.mostrar {
+  opacity: 1;
+}
+</style>
+</head>
+
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+  <div class="content">
+
+    <h1>FASE 04</h1>
+
+    <img class="imagem"
+    src="https://images.unsplash.com/photo-1552832230-c0197dd311b5" 
+    alt="Roma Antiga">
+
+    <div class="romano">
+      <span>M</span><span>M</span><span>I</span>
+    </div>
+
+    <input type="text" id="resposta" placeholder="Digite sua resposta">
+
+    <br>
+    <button onclick="verificar()">CONFIRMAR</button>
+
+    <div class="dicas" id="dicas"></div>
+
+    <div class="sucesso" id="sucesso">
+      Fragmento coletado: UMA
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+/* Partículas */
+const particlesContainer = document.getElementById("particles");
+for (let i = 0; i < 30; i++) {
+  const particle = document.createElement("div");
+  particle.classList.add("particle");
+  const size = Math.random() * 4 + 2;
+  particle.style.width = size + "px";
+  particle.style.height = size + "px";
+  particle.style.left = Math.random() * 100 + "vw";
+  particle.style.animationDuration = (15 + Math.random() * 15) + "s";
+  particle.style.opacity = Math.random() * 0.2 + 0.05;
+  particlesContainer.appendChild(particle);
+}
+</script>
+
+<script>
+
+/* Bloqueia se não fez fase 03 */
+if (!localStorage.getItem("fragmento3")) {
+  window.location.href = "index.html";
+}
+
+let tentativas = 0;
+
+const dicasLista = [
+  "Dica 1: Não são letras comuns.",
+  "Dica 2: Esse sistema era usado na cidade da imagem antigamente.",
+  "Dica 3: O artigo feminino indefinido no singular"
+];
+
+function normalizar(texto) {
+  return texto.trim().toLowerCase();
+}
+
+function verificar() {
+  const resposta = normalizar(document.getElementById("resposta").value);
+
+  if (resposta === "uma") {
+
+    localStorage.setItem("fragmento4", "UMA");
+
+    document.getElementById("sucesso").classList.add("mostrar");
+
+    setTimeout(() => {
+      window.location.href = "fase05.html";
+    }, 2000);
+
+  } else {
+
+    if (tentativas < dicasLista.length) {
+      const dica = document.createElement("div");
+      dica.textContent = dicasLista[tentativas];
+      document.getElementById("dicas").appendChild(dica);
+      tentativas++;
+    }
+  }
+}
+
+</script>
+
+</body>
+</html>

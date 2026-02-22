@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experimento G — Fase 07</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter','Segoe UI',sans-serif; }
+body { background:#000; color:#f5f5f5; overflow-x:hidden; }
+.particles { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; overflow:hidden; }
+.particle { position:absolute; background:white; border-radius:50%; filter:blur(2px); opacity:0.15; animation:float linear infinite; }
+
+/* ===== CONTAINER ===== */
+.container { min-height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:30px 20px; text-align:center; }
+h1 { font-weight:300; letter-spacing:3px; font-size:clamp(18px,4vw,24px); margin-bottom:20px; opacity:0.8; }
+
+/* ===== CAMPOS ===== */
+.field-container { display:flex; flex-direction: column; gap:15px; margin:20px 0; width:100%; max-width:400px; }
+input.final { width:100%; padding:12px; background:transparent; border:1px solid #555; color:#fff; text-align:center; font-size:16px; letter-spacing:1px; outline:none; border-radius:6px; transition:0.3s; }
+input.final:focus { border-color:#00ffff; box-shadow:0 0 10px #00ffff; }
+
+/* ===== BOTÃO CONFIRMAR ===== */
+button.confirmar { padding:12px 30px; background:#00ffff; border:none; color:#000; font-weight:bold; cursor:pointer; transition:0.3s; border-radius:6px; margin-top:15px; }
+button.confirmar:hover { background:#00aaaa; color:#fff; }
+
+/* ===== DICA ===== */
+.dicas { margin-top:15px; font-size:14px; color:#aaa; min-height:30px; max-width:700px; text-align:left; display:none; }
+
+/* ===== SUCESSO ===== */
+.sucesso { margin-top:20px; font-size:16px; letter-spacing:2px; opacity:0; transition:1s; color:#00ff00; }
+.mostrar { opacity:1; }
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+  <h1>FASE 07</h1>
+  <div class="field-container">
+    <input type="text" id="campo1" class="final" placeholder="Resposta fase 1">
+    <input type="text" id="campo2" class="final" placeholder="Resposta fase 2">
+    <input type="text" id="campo3" class="final" placeholder="Resposta fase 3">
+    <input type="text" id="campo4" class="final" placeholder="Resposta fase 4">
+    <input type="text" id="campo5" class="final" placeholder="Resposta fase 5">
+    <input type="text" id="campo6" class="final" placeholder="Resposta fase 6">
+  </div>
+
+  <button class="confirmar" onclick="verificar()">CONFIRMAR</button>
+
+  <div class="dicas" id="dicas">Dica: Use as respostas.</div>
+
+  <div class="sucesso" id="sucesso">Parabéns!</div>
+</div>
+
+<script>
+/* Bloqueio se não fez todas as fases anteriores */
+if (!localStorage.getItem("fragmento1") ||
+    !localStorage.getItem("fragmento2") ||
+    !localStorage.getItem("fragmento3") ||
+    !localStorage.getItem("fragmento4") ||
+    !localStorage.getItem("fragmento5") ||
+    !localStorage.getItem("fragmento6")) {
+      window.location.href="index.html";
+}
+
+/* ===== PARTICULAS FLUIDAS ===== */
+const particlesContainer = document.getElementById("particles");
+for(let i=0;i<30;i++){
+  const particle = document.createElement("div");
+  particle.classList.add("particle");
+  const size = Math.random()*4+2;
+  particle.style.width = size + "px";
+  particle.style.height = size + "px";
+  particle.style.left = Math.random()*100 + "vw";
+  particle.style.top = Math.random()*100 + "vh";
+  particle.style.animationDuration = (10 + Math.random()*20) + "s";
+  particle.style.opacity = Math.random()*0.15+0.05;
+  particle.style.transition = "0.2s";
+  particlesContainer.appendChild(particle);
+}
+
+/* Normalização das respostas */
+function normalizar(texto){
+  return texto.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim();
+}
+
+/* Respostas corretas de cada campo */
+const respostasCorretas = [
+  localStorage.getItem("fragmento1"), 
+  localStorage.getItem("fragmento2"), 
+  localStorage.getItem("fragmento3"), 
+  localStorage.getItem("fragmento4"), 
+  localStorage.getItem("fragmento5"), 
+  localStorage.getItem("fragmento6")
+];
+
+function verificar(){
+  const campos = [
+    document.getElementById("campo1"),
+    document.getElementById("campo2"),
+    document.getElementById("campo3"),
+    document.getElementById("campo4"),
+    document.getElementById("campo5"),
+    document.getElementById("campo6")
+  ];
+
+  let correto = true;
+  for(let i=0;i<campos.length;i++){
+    if(normalizar(campos[i].value) !== normalizar(respostasCorretas[i])){
+      correto=false;
+      break;
+    }
+  }
+
+  const dica = document.getElementById("dicas");
+
+  if(correto){
+    dica.style.display = "none";
+    document.getElementById("sucesso").classList.add("mostrar");
+    setTimeout(()=>{ window.location.href="resultado.html"; },2000);
+  } else {
+    dica.style.display = "block";
+  }
+}
+</script>
+
+</body>
+</html>

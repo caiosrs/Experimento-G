@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experimento G — Fase 05</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+body {
+  background: #000;
+  color: #f5f5f5;
+}
+
+.particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  filter: blur(2px);
+  opacity: 0.15;
+  animation: float linear infinite;
+}
+
+@keyframes float {
+  from { transform: translateY(100vh); }
+  to { transform: translateY(-10vh); }
+}
+
+.container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px;
+}
+
+.content {
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+  transition: 0.6s ease;
+}
+
+h1 {
+  font-weight: 300;
+  letter-spacing: 3px;
+  font-size: clamp(18px, 4vw, 24px);
+  margin-bottom: 30px;
+  opacity: 0.8;
+}
+
+.coord-box {
+  font-size: clamp(18px, 5vw, 26px);
+  letter-spacing: 3px;
+  margin-bottom: 25px;
+}
+
+.coord-input {
+  width: 60px;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid #fff;
+  color: #fff;
+  text-align: center;
+  font-size: 18px;
+  outline: none;
+}
+
+.input-wrapper {
+  position: relative;
+  margin-top: 25px;
+}
+
+input.final {
+  width: 100%;
+  max-width: 320px;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid #555;
+  color: #555;
+  text-align: center;
+  font-size: 15px;
+  letter-spacing: 2px;
+}
+
+.locked-overlay {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+}
+
+.locked-overlay::after {
+  content: "BLOQUEADO";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000000cc;
+  color: #aaa;
+  letter-spacing: 3px;
+  font-size: 13px;
+}
+
+.desbloqueado input.final {
+  border: 1px solid #00ffff;
+  color: #fff;
+}
+
+.desbloqueado .locked-overlay {
+  display: none;
+}
+
+button {
+  margin-top: 18px;
+  padding: 10px 30px;
+  background: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #fff;
+  color: #000;
+}
+
+.dicas {
+  margin-top: 25px;
+  font-size: 14px;
+  color: #aaa;
+  min-height: 60px;
+}
+
+.sucesso {
+  margin-top: 25px;
+  font-size: 16px;
+  letter-spacing: 2px;
+  opacity: 0;
+  transition: 1s;
+}
+
+.hidden-math {
+  position: absolute;
+  font-size: 12px;
+  color: #ffffff10;
+  user-select: none;
+}
+
+.m1 { top: 12%; left: 8%; }
+.m2 { bottom: 18%; right: 10%; }
+.m3 { top: 70%; left: 20%; }
+.m4 { top: 25%; right: 15%; }
+
+</style>
+</head>
+
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="hidden-math m1">thirteen times three</div>
+<div class="hidden-math m2">eleven squared</div>
+<div class="hidden-math m3">three times eleven</div>
+<div class="hidden-math m4">seven</div>
+
+<div class="container">
+  <div class="content" id="content">
+
+    <h1>FASE 05</h1>
+
+    <div class="coord-box">
+      <input class="coord-input" id="lat1">° 
+      <input class="coord-input" id="lat2">' N
+      <br><br>
+      <input class="coord-input" id="lon1">° 
+      <input class="coord-input" id="lon2">' W
+    </div>
+
+    <div class="input-wrapper">
+      <input type="text" id="respostaFinal" class="final" placeholder="Digite sua resposta" disabled>
+      <div class="locked-overlay" onclick="mostrarAviso()"></div>
+    </div>
+
+    <button onclick="acaoPrincipal()">CONFIRMAR</button>
+
+    <div class="dicas" id="dicas"></div>
+
+    <div class="sucesso" id="sucesso">
+      Fragmento coletado: LINDA
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+if (!localStorage.getItem("fragmento4")) {
+  window.location.href = "index.html";
+}
+
+const particlesContainer = document.getElementById("particles");
+for (let i = 0; i < 30; i++) {
+  const particle = document.createElement("div");
+  particle.classList.add("particle");
+  const size = Math.random() * 4 + 2;
+  particle.style.width = size + "px";
+  particle.style.height = size + "px";
+  particle.style.left = Math.random() * 100 + "vw";
+  particle.style.animationDuration = (15 + Math.random() * 15) + "s";
+  particle.style.opacity = Math.random() * 0.2 + 0.05;
+  particlesContainer.appendChild(particle);
+}
+
+let tentativasCoord = 0;
+let tentativasPalavra = 0;
+let desbloqueado = false;
+
+const dicasCoord = [
+  "Dica 1: Essa palavra também descreve você.",
+  "Dica 2: Alguns números estão escritos por extenso… em outro idioma.",
+  "Dica 3: Organize os resultados como latitude e longitude."
+];
+
+const dicasPalavra = [
+  "Dica +: EUA.",
+  "Dica ++: Califórnia.",
+  "Dica +++: Você é isso."
+];
+
+function acaoPrincipal() {
+  if (!desbloqueado) {
+    verificarCoordenadas();
+  } else {
+    verificarPalavra();
+  }
+}
+
+function verificarCoordenadas() {
+  const lat1 = document.getElementById("lat1").value.trim();
+  const lat2 = document.getElementById("lat2").value.trim();
+  const lon1 = document.getElementById("lon1").value.trim();
+  const lon2 = document.getElementById("lon2").value.trim();
+
+  if (lat1 === "39" && lat2 === "7" && lon1 === "121" && lon2 === "33") {
+
+    desbloqueado = true;
+    document.getElementById("content").classList.add("desbloqueado");
+    document.getElementById("respostaFinal").disabled = false;
+
+  } else {
+
+    if (tentativasCoord < dicasCoord.length) {
+      mostrarDica(dicasCoord[tentativasCoord]);
+      tentativasCoord++;
+    }
+  }
+}
+
+function verificarPalavra() {
+  const resposta = normalizar(document.getElementById("respostaFinal").value);
+
+  if (resposta === "linda") {
+
+    localStorage.setItem("fragmento5", "LINDA");
+    document.getElementById("sucesso").style.opacity = "1";
+
+    setTimeout(() => {
+      window.location.href = "fase06.html";
+    }, 2000);
+
+  } else {
+
+    if (tentativasPalavra < dicasPalavra.length) {
+      mostrarDica(dicasPalavra[tentativasPalavra]);
+      tentativasPalavra++;
+    }
+  }
+}
+
+function mostrarDica(texto) {
+  const dica = document.createElement("div");
+  dica.textContent = texto;
+  document.getElementById("dicas").appendChild(dica);
+}
+
+function mostrarAviso() {
+  if (!desbloqueado) {
+    alert("Resolva a primeira parte desta fase.");
+  }
+}
+
+function normalizar(texto) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+document.addEventListener("keypress", function(e){
+  if(e.key === "Enter"){
+    acaoPrincipal();
+  }
+});
+
+</script>
+
+</body>
+</html>

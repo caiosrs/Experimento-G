@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experimento G — Fase 06</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+}
+
+body {
+  background: #000;
+  color: #f5f5f5;
+  overflow-x: hidden;
+}
+
+/* ===== PARTÍCULAS ===== */
+.particles {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+}
+
+.particle {
+  position: absolute;
+  background: white;
+  border-radius: 50%;
+  filter: blur(2px);
+  opacity: 0.15;
+  animation: float linear infinite;
+}
+
+/* ===== CONTAINER ===== */
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 30px 20px;
+  text-align: center;
+}
+
+/* ===== TÍTULO ===== */
+h1 {
+  font-weight: 300;
+  letter-spacing: 3px;
+  font-size: clamp(18px, 4vw, 24px);
+  margin-bottom: 20px;
+  opacity: 0.8;
+}
+
+/* ===== QR CODE ===== */
+.qrcode {
+  width: 140px;
+  height: 140px;
+  margin: 15px 0;
+  cursor: pointer;
+  border: 2px solid #00ffff;
+  border-radius: 6px;
+}
+
+/* ===== QUADRADOS ===== */
+.grid-container {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 20px 0 40px 0;
+}
+
+.square {
+  width: 50px;
+  height: 50px;
+  background: #111;
+  border: 2px solid #555;
+  border-radius: 6px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-weight: bold;
+  cursor: default;
+  transition: 0.3s;
+  box-shadow: 0 0 8px #000;
+}
+
+/* Neon animado */
+.square.neon {
+  border-color: #00ffff;
+  box-shadow: 0 0 15px #00ffff;
+  transition: 0.3s;
+}
+
+/* INPUT */
+input.final {
+  width: 100%;
+  max-width: 320px;
+  padding: 12px;
+  background: transparent;
+  border: 1px solid #555;
+  color: #fff;
+  text-align: center;
+  font-size: 16px;
+  letter-spacing: 2px;
+  outline: none;
+  margin-bottom: 15px;
+}
+
+button {
+  padding: 10px 30px;
+  background: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+button:hover {
+  background: #fff;
+  color: #000;
+}
+
+/* DICAS */
+.dicas {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #aaa;
+  min-height: 50px;
+  max-width: 700px;
+  text-align: left;
+}
+
+/* SUCESSO */
+.sucesso {
+  margin-top: 20px;
+  font-size: 16px;
+  letter-spacing: 2px;
+  opacity: 0;
+  transition: 1s;
+}
+
+.mostrar {
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+  <h1>FASE 06</h1>
+
+  <img class="qrcode" 
+       src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://open.spotify.com/playlist/0rgOT8SX1Fn9NsfnD2LpgG?si=353ea77ccde24185&nd=1&dlsi=4ecd387c3ebc4f81" 
+       alt="QR Code" 
+       onclick="window.open('https://open.spotify.com/playlist/0rgOT8SX1Fn9NsfnD2LpgG?si=353ea77ccde24185&nd=1&dlsi=4ecd387c3ebc4f81', '_blank')">
+
+  <div class="grid-container">
+    <div class="square">10:5</div>
+    <div class="square">22:1</div>
+    <div class="square">34:8</div>
+    <div class="square">23:6</div>
+    <div class="square">40:7</div>
+    <div class="square">32:11</div>
+    <div class="square">15:10</div>
+    <div class="square">25:3</div>
+  </div>
+
+  <input type="text" id="respostaFinal" class="final" placeholder="Digite sua resposta">
+
+  <br>
+  <button onclick="verificar()">CONFIRMAR</button>
+
+  <div class="dicas" id="dicas"></div>
+
+  <div class="sucesso" id="sucesso">
+    Fragmento coletado: HISTÓRIA
+  </div>
+</div>
+
+<script>
+/* Bloqueio se não fez fase 05 */
+if (!localStorage.getItem("fragmento5")) {
+  window.location.href = "index.html";
+}
+
+/* Partículas */
+const particlesContainer = document.getElementById("particles");
+for (let i = 0; i < 30; i++) {
+  const particle = document.createElement("div");
+  particle.classList.add("particle");
+  const size = Math.random() * 4 + 2;
+  particle.style.width = size + "px";
+  particle.style.height = size + "px";
+  particle.style.left = Math.random() * 100 + "vw";
+  particle.style.top = Math.random() * 100 + "vh";
+  particle.style.animationDuration = (15 + Math.random() * 15) + "s";
+  particle.style.opacity = Math.random() * 0.2 + 0.05;
+  particlesContainer.appendChild(particle);
+}
+
+/* Neon animado sequencial mas visualmente aleatório */
+const quadrados = document.querySelectorAll(".square");
+
+// Ordem correta da palavra (H-I-S-T-O-R-I-A), índice dos quadrados
+const ordemQuadrados = [3, 0, 5, 1, 7, 2, 6, 4]; 
+
+function neonAleatorioSequencial() {
+  let i = 0;
+
+  // cria uma ordem visual "aleatória" sem repetir
+  const indicesVisuais = [...Array(quadrados.length).keys()]
+                          .sort(() => Math.random() - 0.5);
+
+  function loop() {
+    if(i > 0) quadrados[ordemQuadrados[i-1]].classList.remove("neon");
+
+    // acende o quadrado certo da sequência
+    const indexAtual = ordemQuadrados[i];
+    quadrados[indexAtual].classList.add("neon");
+
+    i++;
+    if(i < ordemQuadrados.length) {
+      setTimeout(loop, 800);
+    } else {
+      // fim da sequência, espera 5s e reseta
+      setTimeout(() => {
+        quadrados[ordemQuadrados[i-1]].classList.remove("neon");
+        i = 0;
+        setTimeout(loop, 5000);
+      }, 800);
+    }
+  }
+
+  loop();
+}
+
+neonAleatorioSequencial();
+
+/* Dicas */
+let tentativas = 0;
+const dicasLista = [
+  "Dica 1: O QR Code leva a um lugar que você conhece.",
+  "Dica 2: Cada quadradinho indica música e letra, a ordem importa.",
+  "Dica 3: Conhecido como o Pai da...",
+];
+
+function normalizar(texto) {
+  return texto
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim();
+}
+
+function verificar() {
+  const resposta = normalizar(document.getElementById("respostaFinal").value);
+
+  if (resposta === "historia" || resposta === "história") {
+    localStorage.setItem("fragmento6", "HISTÓRIA");
+    document.getElementById("sucesso").classList.add("mostrar");
+
+    setTimeout(() => {
+      window.location.href = "fase07.html";
+    }, 2000);
+  } else {
+    if(tentativas < dicasLista.length) {
+      const dica = document.createElement("div");
+      dica.textContent = dicasLista[tentativas];
+      document.getElementById("dicas").appendChild(dica);
+      tentativas++;
+    }
+  }
+}
+</script>
+
+</body>
+</html>

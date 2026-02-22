@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Experimento G — Resultado</title>
+
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:'Inter','Segoe UI',sans-serif; }
+body {
+  background:#000; color:#fff; overflow:hidden; display:flex; justify-content:center;
+  align-items:center; height:100vh; flex-direction:column; text-align:center; cursor:pointer;
+}
+
+/* TELA DE ENTRADA (O SEGREDO PARA O SOM FUNCIONAR) */
+#overlay-inicio {
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0,0,0,0.95); z-index: 100;
+  display: flex; justify-content: center; align-items: center;
+  cursor: pointer; transition: opacity 0.5s ease;
+}
+#overlay-inicio h2 {
+  color: #00ffff; text-shadow: 0 0 15px #00ffff;
+  font-size: 24px; animation: pulse 1s infinite alternate;
+}
+
+/* Partículas de fundo */
+.particles { position: fixed; top:0; left:0; width:100%; height:100%; z-index:-1; overflow:hidden; }
+.particle { position:absolute; background:white; border-radius:50%; filter:blur(2px); opacity:0.15; animation:float linear infinite; }
+
+/* DESIGN DOS CONFETES */
+.confete {
+  position: absolute; pointer-events: none; z-index: 10;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+  animation: fall linear forwards, sideSway ease-in-out infinite alternate;
+}
+
+@keyframes fall {
+  0% { transform: translateY(-5vh) rotateX(0deg) rotateY(0deg); opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(105vh) rotateX(720deg) rotateY(360deg); opacity: 0; }
+}
+
+@keyframes sideSway {
+  0% { margin-left: -25px; }
+  100% { margin-left: 25px; }
+}
+
+/* Neon título */
+h1 {
+  font-size:clamp(24px,6vw,60px); color:#00ffff;
+  text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+  margin-bottom:20px; animation:pulse 1s infinite alternate; z-index: 20;
+}
+@keyframes pulse { 0% { text-shadow: 0 0 10px #00ffff,0 0 20px #00ffff; } 100% { text-shadow: 0 0 30px #00ffff,0 0 50px #00ffff; } }
+
+.subtitulo { font-size:20px; color:#aaa; margin-bottom:40px; animation:fadeIn 2s ease forwards; opacity:0; z-index: 20; }
+@keyframes fadeIn { to { opacity:1; } }
+
+button.home { 
+  padding:15px 40px; font-size:16px; border:none; border-radius:8px; 
+  background:#00ffff; color:#000; font-weight:bold; cursor:pointer; 
+  transition:0.3s; z-index: 20; position: relative;
+}
+button.home:hover { background:#00aaaa; color:#fff; transform: scale(1.05); }
+</style>
+</head>
+<body>
+
+<div id="overlay-inicio" onclick="iniciarTudo()">
+    <h2>CLIQUE PARA REIVINDICAR SUA VITÓRIA! 🏆</h2>
+</div>
+
+<div class="particles" id="particles"></div>
+
+<h1>🎉 VOCÊ CONSEGUIU! 🎉</h1>
+<div class="subtitulo">Parabéns! Você completou todas as fases!</div>
+<button class="home" onclick="window.location.href='index.html'">Voltar ao início</button>
+
+<audio id="musicaFesta" loop>
+  <source src="backtofriends.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+/* ===== PARTICULAS DE FUNDO ===== */
+const particlesContainer = document.getElementById("particles");
+for(let i=0;i<50;i++){
+  const particle=document.createElement("div");
+  particle.classList.add("particle");
+  const size=Math.random()*5+2;
+  particle.style.width=size+"px";
+  particle.style.height=size+"px";
+  particle.style.left=Math.random()*100+"vw";
+  particle.style.top=Math.random()*100+"vh";
+  particle.style.animationDuration=(10+Math.random()*20)+"s";
+  particlesContainer.appendChild(particle);
+}
+
+/* ===== FUNÇÃO DE CONFETE ===== */
+function criarConfete(x, y, isExplosion = true) {
+  const quantidade = isExplosion ? 15 : 1; 
+  for (let i = 0; i < quantidade; i++) {
+    const confete = document.createElement("div");
+    confete.classList.add("confete");
+    const offSetX = isExplosion ? (Math.random() - 0.5) * 80 : 0;
+    confete.style.left = (x + offSetX) + "px";
+    confete.style.top = y + "px";
+    const hue = Math.random() * 360;
+    confete.style.backgroundColor = `hsl(${hue}, 100%, 60%)`;
+    const isCircle = Math.random() > 0.5;
+    confete.style.borderRadius = isCircle ? "50%" : "2px";
+    const size = Math.random() * 10 + 6;
+    confete.style.width = size + "px";
+    confete.style.height = (isCircle ? size : size * 0.6) + "px";
+    const duracaoQueda = 3 + Math.random() * 3;
+    const duracaoBalanço = 0.5 + Math.random() * 0.8;
+    confete.style.animationDuration = `${duracaoQueda}s, ${duracaoBalanço}s`;
+    confete.style.animationDelay = `0s, ${Math.random()}s`;
+    document.body.appendChild(confete);
+    setTimeout(() => confete.remove(), duracaoQueda * 1000);
+  }
+}
+
+/* ===== LOGICA DE INICIALIZAÇÃO ===== */
+const musica = document.getElementById("musicaFesta");
+let musicaAtivada = false;
+
+function iniciarTudo() {
+    // Esconde o overlay
+    document.getElementById('overlay-inicio').style.display = 'none';
+    
+    // Toca a música (agora o navegador permite porque houve um clique real)
+    musica.play().catch(e => console.log("Erro: ", e));
+    musicaAtivada = true;
+
+    // Explosão inicial de confetes
+    for(let i=0; i<5; i++) {
+        setTimeout(() => {
+            criarConfete(Math.random() * window.innerWidth, Math.random() * window.innerHeight, true);
+        }, i * 200);
+    }
+}
+
+// Explosão extra ao clicar em qualquer lugar após iniciar
+document.body.addEventListener("click", (e) => {
+  if(musicaAtivada) {
+    criarConfete(e.clientX, e.clientY, true);
+  }
+});
+
+// Chuva contínua automática
+setInterval(() => {
+  if(musicaAtivada) {
+    criarConfete(Math.random() * window.innerWidth, -20, false);
+  }
+}, 350);
+
+</script>
+
+</body>
+</html>
